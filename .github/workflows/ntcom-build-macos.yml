@@ -120,7 +120,10 @@ jobs:
         run: |
           CREATE_DMG="$(readlink -f "$(command -v create-dmg)")"
           sed -i -e 's/MAXIMUM_UNMOUNTING_ATTEMPTS=3/MAXIMUM_UNMOUNTING_ATTEMPTS=7/' "$CREATE_DMG"
-          create-dmg --icon "NtcomDesk.app" 200 190 --hide-extension "NtcomDesk.app" --window-size 800 400 --app-drop-link 600 185 NtcomDesk-${{ env.VERSION }}-${{ matrix.job.arch }}.dmg ./flutter/build/macos/Build/Products/Release/NtcomDesk.app
+          create-dmg \
+            --volname "NtcomDesk" --window-pos 200 120 --window-size 660 420 --icon-size 120 \
+            --icon "NtcomDesk.app" 165 210 --app-drop-link 495 210 --hide-extension "NtcomDesk.app" --no-internet-enable \
+            NtcomDesk-${{ env.VERSION }}-${{ matrix.job.arch }}.dmg ./flutter/build/macos/Build/Products/Release/NtcomDesk.app
 
       - name: Upload unsigned dmg
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

@@ -113,12 +113,29 @@ for DMG in "${CAC_DMG[@]}"; do
 
   if [ "$CHI_KY" = "1" ]; then echo "  (bỏ qua công chứng vì --chi-ky)"; continue; fi
 
-  echo "--- Đóng lại thành dmg đã ký ---"
+  echo "--- Đóng lại thành dmg đã ký (có alias Applications để kéo-thả) ---"
   RA="$GOC/$(basename "$DMG" .dmg)-signed.dmg"; rm -f "$RA"
+  # Cần create-dmg để có bố cục kéo-thả chuẩn macOS. Thiếu thì cài qua Homebrew.
+  if ! command -v create-dmg >/dev/null 2>&1; then
+    if command -v brew >/dev/null 2>&1; then
+      echo "    Cài create-dmg qua Homebrew..."; brew install create-dmg
+    fi
+  fi
+  APPNAME="$(basename "$APP")"
   if command -v create-dmg >/dev/null 2>&1; then
-    create-dmg --icon "$(basename "$APP")" 200 190 --hide-extension "$(basename "$APP")" \
-      --window-size 800 400 --app-drop-link 600 185 "$RA" "$APP" >/dev/null
+    # App bên trái, alias Applications bên phải -> người dùng chỉ việc kéo qua.
+    create-dmg \
+      --volname "NtcomDesk" \
+      --window-pos 200 120 \
+      --window-size 660 420 \
+      --icon-size 120 \
+      --icon "$APPNAME" 165 210 \
+      --app-drop-link 495 210 \
+      --hide-extension "$APPNAME" \
+      --no-internet-enable \
+      "$RA" "$APP" >/dev/null
   else
+    echo "    (Không có create-dmg và không có brew -> tạo dmg trơn, KHÔNG có alias Applications)"
     hdiutil create -volname "NtcomDesk" -srcfolder "$APP" -ov -format UDZO "$RA" >/dev/null
   fi
   codesign --force --timestamp --sign "$DINH_DANH" "$RA"
