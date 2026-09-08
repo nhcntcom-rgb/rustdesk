@@ -172,3 +172,28 @@ jobs:
         with:
           name: Ntcomdesk-installer-windows-x86_64
           path: ./SignOutput/Ntcomdesk-*.exe
+
+      # ---- MSI (best-effort; nếu lỗi vẫn còn bản .exe ở trên) ----
+      - name: Add MSBuild to PATH
+        uses: microsoft/setup-msbuild@6fb02220983dee41ce7ae257b6f4d8f9bf5ed4ce # v2
+        continue-on-error: true
+
+      - name: Build msi
+        continue-on-error: true
+        run: |
+          pushd ./res/msi
+          python preprocess.py --arp --app-name Ntcomdesk -d ../../rustdesk
+          nuget restore msi.sln
+          msbuild msi.sln -p:Configuration=Release -p:Platform=x64 /p:TargetVersion=Windows10
+          $msi = Get-ChildItem ./Package/bin/*/Release/en-us/Package.msi | Select-Object -First 1
+          popd
+          if (-not (Test-Path ./SignOutput)) { mkdir ./SignOutput }
+          mv $msi.FullName ./SignOutput/Ntcomdesk-${{ env.VERSION }}-x86_64.msi
+          sha256sum ./SignOutput/Ntcomdesk-*.msi
+
+      - name: Upload installer (msi)
+        continue-on-error: true
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: Ntcomdesk-msi-windows-x86_64
+          path: ./SignOutput/Ntcomdesk-*.msi
