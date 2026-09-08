@@ -40,7 +40,7 @@ command -v codesign >/dev/null || { echo "Thiếu Xcode CLT: xcode-select --inst
 GOC="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Entitlements của NtcomDesk (khớp bản build) — ghi ra file tạm để ký gói.
-QUYEN="$(mktemp /tmp/ntcomdesk-ent.XXXXXX.plist)"
+QUYEN="/tmp/ntcomdesk-ent-$$.plist"; rm -f "$QUYEN"
 cat > "$QUYEN" <<'PLIST'
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -99,8 +99,8 @@ ky_app() {  # $1 = đường dẫn .app
 for DMG in "${CAC_DMG[@]}"; do
   echo; echo "==========================================================="
   echo " $DMG"; echo "==========================================================="
-  MNT="$(mktemp -d /tmp/ntcomdesk-mnt.XXXXXX)"
-  WORK="$(mktemp -d /tmp/ntcomdesk-work.XXXXXX)"
+  MNT="/tmp/ntcomdesk-mnt-$$-$RANDOM"; mkdir -p "$MNT"
+  WORK="/tmp/ntcomdesk-work-$$-$RANDOM"; mkdir -p "$WORK"
   hdiutil attach "$DMG" -nobrowse -mountpoint "$MNT" >/dev/null
   APPSRC="$(find "$MNT" -maxdepth 1 -name "*.app" -type d | head -1)"
   [ -n "$APPSRC" ] || { echo "Không thấy .app trong dmg"; hdiutil detach "$MNT" >/dev/null; exit 1; }
