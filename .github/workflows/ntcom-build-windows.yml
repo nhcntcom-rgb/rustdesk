@@ -126,7 +126,7 @@ jobs:
         run: |
           python3 .\build.py --portable --flutter --skip-portable-pack --hwcodec --vram
           mv ./flutter/build/windows/x64/runner/Release ./rustdesk
-          mv ./rustdesk/rustdesk.exe ./rustdesk/NTCOMRemote.exe   # đặt tên khớp APP_NAME để cài + service không lỗi
+          mv ./rustdesk/rustdesk.exe ./rustdesk/Ntcomdesk.exe   # đặt tên khớp APP_NAME để cài + service không lỗi
           Invoke-WebRequest -Uri https://github.com/rustdesk-org/rdev/releases/download/usbmmidd_v2/usbmmidd_v2.zip -OutFile usbmmidd_v2.zip
           Expand-Archive usbmmidd_v2.zip -DestinationPath .
           Remove-Item -Path usbmmidd_v2\Win32 -Recurse
@@ -152,7 +152,7 @@ jobs:
       - name: Upload portable folder (unsigned)
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: NTCOMRemote-portable-windows-x86_64
+          name: Ntcomdesk-portable-windows-x86_64
           path: rustdesk
 
       - name: Build self-extracted executable
@@ -161,14 +161,14 @@ jobs:
           sed -i '/dpiAware/d' res/manifest.xml
           pushd ./libs/portable
           pip3 install -r requirements.txt
-          python3 ./generate.py -f ../../rustdesk/ -o . -e ../../rustdesk/NTCOMRemote.exe
+          python3 ./generate.py -f ../../rustdesk/ -o . -e ../../rustdesk/Ntcomdesk.exe
           popd
           mkdir -p ./SignOutput
-          mv ./target/release/rustdesk-portable-packer.exe ./SignOutput/NTCOMRemote-${{ env.VERSION }}-x86_64.exe
-          sha256sum ./SignOutput/NTCOMRemote-*.exe
+          mv ./target/release/rustdesk-portable-packer.exe ./SignOutput/Ntcomdesk-${{ env.VERSION }}-x86_64.exe
+          sha256sum ./SignOutput/Ntcomdesk-*.exe
 
       - name: Upload installer (self-extracted exe)
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: NTCOMRemote-installer-windows-x86_64
-          path: ./SignOutput/NTCOMRemote-*.exe
+          name: Ntcomdesk-installer-windows-x86_64
+          path: ./SignOutput/Ntcomdesk-*.exe
